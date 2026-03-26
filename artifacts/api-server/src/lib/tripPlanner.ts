@@ -279,50 +279,83 @@ export function generateTripPlan(req: TripPlanRequest): TripPlanResponse {
   ];
 
   const startHour = startTime.getHours();
+  const startMin = startTime.getHours() * 60 + startTime.getMinutes();
+  const totalTripMinutes = driveMinutes + 90;
   const mealRecommendations: MealStop[] = [];
 
-  if (startHour < 10) {
-    const breakfastTime = addMinutes(startTime, 45);
+  // Helper: minutes from trip start until the clock reaches targetHour (0-23).
+  // Returns -1 if the trip ends before reaching that hour.
+  const offsetToReachHour = (targetHour: number): number => {
+    const targetMin = targetHour * 60;
+    let diff = targetMin - startMin;
+    if (diff < 0) diff += 24 * 60; // crosses midnight
+    return diff <= totalTripMinutes ? diff : -1;
+  };
+
+  // --- BREAKFAST (6 am – 10:59 am) ---
+  // Only include when the trip has a morning segment.
+  // Place it ~50 min in, but only if that clock time is still before 11 am.
+  if (startHour < 11) {
+    const breakfastOffset = Math.max(40, offsetToReachHour(7) >= 0 ? offsetToReachHour(7) : 40);
+    const breakfastTime = addMinutes(startTime, breakfastOffset);
+    if (breakfastTime.getHours() < 11) {
+      mealRecommendations.push({
+        id: "meal-breakfast",
+        name: "The Morning Roost Diner",
+        mealType: "breakfast",
+        cuisine: "American Diner",
+        description: "A beloved local institution serving hearty breakfasts since 1958. Famous for fluffy pancakes and fresh-ground coffee.",
+        estimatedArrivalTime: timeStr(breakfastTime),
+        location: "Riverside Junction, 50 miles from start",
+        priceRange: "$",
+        openHours: "6:00-11:00",
+        isOpen: isOpenAtTime("6:00-11:00", breakfastTime),
+        mustTry: ["Blue Ribbon Pancakes", "Country Skillet Hash", "Fresh-squeezed OJ"],
+        alternativeOptions: [
+          { name: "Highway Perk Coffee", cuisine: "Cafe", priceRange: "$", openHours: "5:30-10:30", reason: "Opens earlier, great for grab-and-go" },
+          { name: "Sunrise Bakery", cuisine: "Bakery", priceRange: "$", openHours: "6:30-10:45", reason: "Famous fresh pastries and local honey" },
+        ],
+      });
+    }
+  }
+
+  // --- LUNCH (12 pm – 3:59 pm) ---
+  // Find when the trip clock hits 12:00. If the trip starts after noon, place lunch 30 min in.
+  // Skip if trip is entirely outside the noon–4 pm window.
+  let lunchOffset = offsetToReachHour(12);
+  if (lunchOffset < 0 && startHour >= 12 && startHour < 16) lunchOffset = 30;
+  if (lunchOffset >= 0) {
+    const lunchTime = addMinutes(startTime, lunchOffset);
     mealRecommendations.push({
-      id: "meal-breakfast",
-      name: "The Morning Roost Diner",
-      mealType: "breakfast",
-      cuisine: "American Diner",
-      description: "A beloved local institution serving hearty breakfasts since 1958. Famous for fluffy pancakes and fresh-ground coffee.",
-      estimatedArrivalTime: timeStr(breakfastTime),
-      location: "Riverside Junction, 50 miles from start",
-      priceRange: "$",
-      openHours: "6:00-14:00",
-      isOpen: isOpenAtTime("6:00-14:00", breakfastTime),
-      mustTry: ["Blue Ribbon Pancakes", "Country Skillet Hash", "Fresh-squeezed OJ"],
+      id: "meal-lunch",
+      name: "The Trailhead Bistro",
+      mealType: "lunch",
+      cuisine: "Farm-to-Table American",
+      description: "A charming bistro sourcing ingredients from local farms. Perfect pit stop with a shaded outdoor patio.",
+      estimatedArrivalTime: timeStr(lunchTime),
+      location: "Cedar Falls, 155 miles from start",
+      priceRange: "$$",
+      openHours: "12:00-16:00",
+      isOpen: isOpenAtTime("12:00-16:00", lunchTime),
+      mustTry: ["Harvest Bowl", "Smoked Brisket Sandwich", "Locally-brewed Root Beer"],
       alternativeOptions: [
-        { name: "Highway Perk Coffee", cuisine: "Cafe", priceRange: "$", openHours: "5:30-15:00", reason: "Opens earlier, great for grab-and-go" },
-        { name: "Sunrise Bakery", cuisine: "Bakery", priceRange: "$", openHours: "7:00-13:00", reason: "Famous fresh pastries and local honey" },
+        { name: "Cedar Falls Market", cuisine: "Deli", priceRange: "$", openHours: "10:00-20:00", reason: "Grab picnic supplies for the state park stop" },
+        { name: "Mama Rosa's Cantina", cuisine: "Mexican", priceRange: "$", openHours: "12:00-21:00", reason: "Consistently rated best tacos on the route" },
       ],
     });
   }
 
-  const lunchTime = addMinutes(startTime, 160);
-  mealRecommendations.push({
-    id: "meal-lunch",
-    name: "The Trailhead Bistro",
-    mealType: "lunch",
-    cuisine: "Farm-to-Table American",
-    description: "A charming bistro sourcing ingredients from local farms. Perfect pit stop with a shaded outdoor patio.",
-    estimatedArrivalTime: timeStr(lunchTime),
-    location: "Cedar Falls, 155 miles from start",
-    priceRange: "$$",
-    openHours: "11:00-16:00",
-    isOpen: isOpenAtTime("11:00-16:00", lunchTime),
-    mustTry: ["Harvest Bowl", "Smoked Brisket Sandwich", "Locally-brewed Root Beer"],
-    alternativeOptions: [
-      { name: "Cedar Falls Market", cuisine: "Deli", priceRange: "$", openHours: "8:00-20:00", reason: "Grab picnic supplies for the state park stop" },
-      { name: "Mama Rosa's Cantina", cuisine: "Mexican", priceRange: "$", openHours: "10:30-21:00", reason: "Consistently rated best tacos on the route" },
-    ],
-  });
-
-  if (driveMinutes > 240) {
-    const dinnerTime = addMinutes(startTime, driveMinutes + 30);
+  // --- DINNER (8 pm – 10:59 pm) ---
+  // Find when the trip clock hits 20:00.
+  // If the trip is long enough to reach 8 pm — or if arrival is already after 8 pm — add dinner.
+  let dinnerOffset = offsetToReachHour(20);
+  // Arrival after 8 pm but trip doesn't have a full segment there: add dinner 30 min after arrival
+  if (dinnerOffset < 0) {
+    const arrivalTime2 = addMinutes(startTime, totalTripMinutes);
+    if (arrivalTime2.getHours() >= 20) dinnerOffset = totalTripMinutes + 30;
+  }
+  if (dinnerOffset >= 0) {
+    const dinnerTime = addMinutes(startTime, dinnerOffset);
     mealRecommendations.push({
       id: "meal-dinner",
       name: "Summit House Restaurant",
@@ -332,12 +365,12 @@ export function generateTripPlan(req: TripPlanRequest): TripPlanResponse {
       estimatedArrivalTime: timeStr(dinnerTime),
       location: `Near ${req.destination}`,
       priceRange: "$$$",
-      openHours: "17:00-22:00",
-      isOpen: isOpenAtTime("17:00-22:00", dinnerTime),
+      openHours: "20:00-23:00",
+      isOpen: isOpenAtTime("20:00-23:00", dinnerTime),
       mustTry: ["Dry-Aged Ribeye", "Wild Mushroom Risotto", "Craft Cocktails"],
       alternativeOptions: [
-        { name: "The Local Tap", cuisine: "Pub Food", priceRange: "$$", openHours: "16:00-23:00", reason: "Great burgers, local craft beers, no reservation needed" },
-        { name: "Golden Dragon", cuisine: "Chinese", priceRange: "$$", openHours: "17:00-22:30", reason: "Authentic dim sum, perfect for groups" },
+        { name: "The Local Tap", cuisine: "Pub Food", priceRange: "$$", openHours: "20:00-23:59", reason: "Great burgers, local craft beers, no reservation needed" },
+        { name: "Golden Dragon", cuisine: "Chinese", priceRange: "$$", openHours: "20:00-23:00", reason: "Authentic dim sum, perfect for groups" },
       ],
     });
   }

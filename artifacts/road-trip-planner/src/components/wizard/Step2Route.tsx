@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Calendar, Compass, ArrowRight, Loader2 } from 'lucide-react';
 import { useTripStore } from '@/store/use-trip-store';
 import { usePlanTrip } from '@workspace/api-client-react';
+import { LocationInput } from './LocationInput';
 
 const PREFERENCES = [
   { id: 'scenic', label: 'Scenic Routes' },
@@ -63,12 +64,10 @@ export function Step2Route({ onNext }: { onNext: () => void }) {
             <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 z-10 outline outline-4 outline-card">
               <div className="w-2 h-2 rounded-full bg-primary" />
             </div>
-            <input 
-              type="text"
+            <LocationInput
               value={request.startLocation}
-              onChange={(e) => updateRequest({ startLocation: e.target.value })}
+              onChange={(val) => updateRequest({ startLocation: val })}
               placeholder="e.g. San Francisco, CA"
-              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium text-foreground placeholder:text-muted-foreground placeholder:font-normal"
             />
           </div>
         </div>
@@ -79,12 +78,10 @@ export function Step2Route({ onNext }: { onNext: () => void }) {
             <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center text-secondary shrink-0 z-10 outline outline-4 outline-card">
               <MapPin className="w-4 h-4" />
             </div>
-            <input 
-              type="text"
+            <LocationInput
               value={request.destination}
-              onChange={(e) => updateRequest({ destination: e.target.value })}
+              onChange={(val) => updateRequest({ destination: val })}
               placeholder="e.g. Yosemite National Park"
-              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium text-foreground placeholder:text-muted-foreground placeholder:font-normal"
             />
           </div>
         </div>

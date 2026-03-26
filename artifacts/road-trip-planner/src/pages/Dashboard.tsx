@@ -6,6 +6,7 @@ import { MealsList } from '@/components/dashboard/MealsList';
 import { DelayAdjuster } from '@/components/dashboard/DelayAdjuster';
 import { useTripStore } from '@/store/use-trip-store';
 import { Map, Flag, MapPin, Save, PlayCircle, Navigation, Music as MusicIcon } from 'lucide-react';
+import { formatTripTime } from '@/utils/formatTripTime';
 import { useSaveTrip } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -111,7 +112,7 @@ export default function Dashboard() {
                 <div>
                   <div className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-1">Est. Arrival</div>
                   <div className="text-2xl font-bold">
-                    {new Date(plan.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {formatTripTime(plan.estimatedArrival)}
                   </div>
                 </div>
               </div>

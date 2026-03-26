@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For fluid, premium page transitions and staggered list animations"
+  "zustand": "Lightweight state management for the multi-step wizard and dashboard state"
+  "date-fns": "For elegant human-readable date and time formatting"
+  "clsx": "For conditional class name merging"
+  "tailwind-merge": "For merging Tailwind classes without conflicts"
+
+images:
+  - path: "artifacts/road-trip-planner/public/images/hero-bg.png"
+    description: "Scenic majestic mountain road winding through a lush valley during golden hour sunset, warm earthy tones, terracotta and sage green, adventurous travel aesthetic, highly detailed, photorealistic"
+    aspect_ratio: "16:9"
+  - path: "artifacts/road-trip-planner/public/images/empty-state.png"
+    description: "Stylized minimal flat vector illustration of an open paper map with a classic compass, a vintage camera, and a coffee cup, warm earthy tones, isolated on transparent background"
+    aspect_ratio: "1:1"
+
+notes:
+  - "The app uses React Query hooks generated in @workspace/api-client-react"
+  - "Zustand is used to persist the TripPlanRequest across the multi-step wizard and power the Dashboard"
+  - "Visual diffing is implemented in the Dashboard by comparing the current plan with the previousPlan in the store"

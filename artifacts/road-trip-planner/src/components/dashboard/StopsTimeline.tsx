@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MapPin, Camera, Coffee, Fuel, Tent, Navigation, CheckCircle, Plus, GripVertical, Trash2, Edit2 } from 'lucide-react';
 import { useTripStore } from '@/store/use-trip-store';
-import { format, parseISO } from 'date-fns';
+import { formatTripTime } from '@/utils/formatTripTime';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -106,7 +106,7 @@ function SortableStopItem({ stop, idx, isDiff, isNew }: { stop: Stop, idx: numbe
           <div className="text-right shrink-0 flex items-start gap-4">
             <div>
               <div className="text-lg font-bold text-foreground">
-                {format(parseISO(stop.estimatedArrivalTime), 'h:mm a')}
+                {formatTripTime(stop.estimatedArrivalTime)}
               </div>
               <div className="text-sm text-muted-foreground">
                 Stop: {stop.estimatedStopDuration}

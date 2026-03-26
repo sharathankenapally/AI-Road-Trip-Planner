@@ -1,7 +1,7 @@
-import { Utensils, Clock, MapPin, ExternalLink, RefreshCw } from 'lucide-react';
+import { Utensils, Clock, MapPin, RefreshCw } from 'lucide-react';
 import { useTripStore } from '@/store/use-trip-store';
-import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
+import { formatTripTime } from '@/utils/formatTripTime';
 
 export function MealsList() {
   const { plan, previousPlan } = useTripStore();
@@ -55,7 +55,7 @@ export function MealsList() {
                     <Clock className="w-4 h-4" /> Arrival
                   </div>
                   <div className="text-xl font-bold text-foreground">
-                    {format(parseISO(meal.estimatedArrivalTime), 'h:mm a')}
+                    {formatTripTime(meal.estimatedArrivalTime)}
                   </div>
                 </div>
               </div>

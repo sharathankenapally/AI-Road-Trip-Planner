@@ -19,24 +19,34 @@ router.post("/vehicle-check", (req, res) => {
   res.json(data);
 });
 
-router.post("/plan", (req, res) => {
+router.post("/plan", async (req, res) => {
   const parseResult = PlanTripBody.safeParse(req.body);
   if (!parseResult.success) {
     res.status(400).json({ error: "Invalid request", details: parseResult.error.flatten() });
     return;
   }
-  const data = generateTripPlan(parseResult.data);
-  res.json(data);
+  try {
+    const data = await generateTripPlan(parseResult.data);
+    res.json(data);
+  } catch (err) {
+    console.error("Trip plan error:", err);
+    res.status(500).json({ error: "Failed to generate trip plan" });
+  }
 });
 
-router.post("/adjust", (req, res) => {
+router.post("/adjust", async (req, res) => {
   const parseResult = AdjustTripBody.safeParse(req.body);
   if (!parseResult.success) {
     res.status(400).json({ error: "Invalid request", details: parseResult.error.flatten() });
     return;
   }
-  const data = adjustTripPlan(parseResult.data);
-  res.json(data);
+  try {
+    const data = await adjustTripPlan(parseResult.data);
+    res.json(data);
+  } catch (err) {
+    console.error("Trip adjust error:", err);
+    res.status(500).json({ error: "Failed to adjust trip plan" });
+  }
 });
 
 router.post("/traffic", (req, res) => {
@@ -53,9 +63,8 @@ router.post("/traffic", (req, res) => {
     { type: "weather", description: "Fog advisory, reduced speed limit", location: "Mountain pass", severity: "medium", delayMinutes: 15 },
   ];
 
-  const hour = new Date().getHours();
+  const hour = new Date().getUTCHours();
   const isPeakHour = (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19);
-
   const randomIncidents = Math.random() > 0.5 ? [INCIDENTS[Math.floor(Math.random() * INCIDENTS.length)]] : [];
   const baseDelay = isPeakHour ? 15 : 5;
   const incidentDelay = randomIncidents.reduce((sum, inc) => sum + inc.delayMinutes, 0);

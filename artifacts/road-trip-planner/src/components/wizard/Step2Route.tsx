@@ -28,11 +28,15 @@ export function Step2Route({ onNext }: { onNext: () => void }) {
   const handleSubmit = () => {
     if (!request.startLocation || !request.destination) return;
     
+    // Send as UTC wall-clock: append Z so the server treats it as UTC,
+    // preserving the exact hour the user typed (avoids local-tz→UTC conversion).
+    const rawTime = request.startTime; // "YYYY-MM-DDTHH:mm"
+    const startTimeUTC = rawTime.length === 16 ? rawTime + ":00.000Z" : rawTime;
+
     planTrip.mutate({
       data: {
         ...request,
-        // API expects ISO 8601 string, but datetime-local might miss seconds/timezone
-        startTime: new Date(request.startTime).toISOString()
+        startTime: startTimeUTC,
       }
     }, {
       onSuccess: (res) => {

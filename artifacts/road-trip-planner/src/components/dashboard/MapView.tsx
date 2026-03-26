@@ -3,8 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useTripStore } from '@/store/use-trip-store';
-import { parseISO, format } from 'date-fns';
 import { MapPin } from 'lucide-react';
+import { formatTripTime } from '@/utils/formatTripTime';
 
 // Fix Leaflet's default icon path issues in React
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -132,7 +132,7 @@ export function MapView() {
                   <h4 className="font-bold font-display text-base">{stop.name}</h4>
                   <div className="text-xs text-muted-foreground capitalize mb-2">{stop.type.replace('_', ' ')}</div>
                   <div className="text-sm flex items-center justify-between mt-2 pt-2 border-t">
-                    <span>{format(parseISO(stop.estimatedArrivalTime), 'h:mm a')}</span>
+                    <span>{formatTripTime(stop.estimatedArrivalTime)}</span>
                     <span className={`text-xs font-bold ${stop.isOpen ? 'text-green-600' : 'text-red-500'}`}>
                       {stop.isOpen ? 'Open' : 'Closed'}
                     </span>

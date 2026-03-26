@@ -4,7 +4,7 @@ import { useListTrips, useDeleteTrip, useUpdateTrip } from '@workspace/api-clien
 import { useTripStore } from '@/store/use-trip-store';
 import { useLocation } from 'wouter';
 import { Map, Calendar, Users, Car, Trash2, Heart, Play, AlertCircle } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { formatTripTime, formatTripDate } from '@/utils/formatTripTime';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 import { getListTripsQueryKey } from '@workspace/api-client-react';
@@ -105,7 +105,7 @@ export default function MyTripsPage() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4 shrink-0" />
-                      <span>{format(parseISO(trip.startTime), 'MMM d, yyyy h:mm a')}</span>
+                      <span>{formatTripDate(trip.startTime)} {formatTripTime(trip.startTime)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {trip.travelers}</span>

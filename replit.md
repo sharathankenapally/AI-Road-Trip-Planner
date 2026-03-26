@@ -91,6 +91,27 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/road-trip-planner` (`@workspace/road-trip-planner`)
+
+React + Vite frontend with full road trip planning UX.
+
+**Features:**
+- 4-step planning wizard: Vehicle → Route → Options → Dashboard
+- Interactive map (Leaflet + OpenStreetMap) with stop markers
+- Live trip mode with browser Geolocation API tracking
+- Drag-to-reorder stops using @dnd-kit with custom stop creation
+- AI Advisor panel: personalized recommendations via GPT
+- AI Music Player: mood-based playlist generation with YouTube links
+- Nearby Places search with category filters
+- Traffic panel with real-time delay estimates and incidents
+- Saved trips (CRUD via `/api/trips`) with My Trips page
+- In-app notification bell + browser push notifications
+- Zustand global store (`use-trip-store.ts`) for all app state
+
+**Routes:** `/` (home), `/plan` (wizard), `/dashboard` (active trip), `/trips` (saved trips)
+
+**Key packages:** react-leaflet, leaflet, @dnd-kit/core+sortable, framer-motion, @tanstack/react-query, zustand, shadcn/ui
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

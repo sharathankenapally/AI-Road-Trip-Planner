@@ -59,7 +59,7 @@ export function Step2Route({ onNext }: { onNext: () => void }) {
         <p className="text-muted-foreground mt-2">Where are we heading and what are the vibes?</p>
       </div>
 
-      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm space-y-6 relative overflow-hidden">
+      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm space-y-6 relative">
         <div className="absolute left-9 top-14 bottom-14 w-0.5 bg-border/80 border-dashed border-l-2 border-border/50" />
         
         <div className="relative z-10 space-y-2">

@@ -1,17 +1,20 @@
-import { Map, Compass } from 'lucide-react';
+import { Map } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useTripStore } from '@/store/use-trip-store';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
+import { HowItWorksDialog } from './HowItWorksDialog';
 
 export function Navbar() {
   const [location] = useLocation();
-  const isHome = location === '/';
   const { liveMode } = useTripStore();
+  const isDashboard = location === '/dashboard';
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+    <nav className="fixed top-0 inset-x-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/50 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+
+        {/* Left — Logo + Live badge */}
+        <div className="flex items-center gap-4 shrink-0">
           <Link href="/" className="flex items-center gap-2 group outline-none">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
               <Map className="w-5 h-5" />
@@ -22,43 +25,42 @@ export function Navbar() {
           </Link>
 
           {liveMode && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-bold uppercase tracking-wider border border-green-500/20">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               Live
             </div>
           )}
         </div>
-        
-        <div className="flex items-center gap-2 sm:gap-4">
-          {!isHome && (
-            <>
-              <Link 
-                href="/plan" 
-                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
-              >
-                New Trip
-              </Link>
-              <Link 
-                href="/trips" 
-                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                My Trips
-              </Link>
-              <NotificationBell />
-            </>
-          )}
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noreferrer"
-            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-semibold hover:bg-secondary/90 hover:shadow-md transition-all duration-200"
+
+        {/* Right — Nav links + actions */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Link
+            href="/plan"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              location === '/plan'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+            }`}
           >
-            <Compass className="w-4 h-4" />
-            <span>Explore More</span>
-          </a>
+            New Trip
+          </Link>
+
+          <Link
+            href="/trips"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              location === '/trips'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+            }`}
+          >
+            My Trips
+          </Link>
+
+          {isDashboard && <NotificationBell />}
+
+          <HowItWorksDialog />
         </div>
       </div>
     </nav>
   );
 }
-

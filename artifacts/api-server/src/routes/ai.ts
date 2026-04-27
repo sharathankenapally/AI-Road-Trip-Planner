@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { GetAiRecommendationsBody, GetAiMusicPlaylistBody } from "@workspace/api-zod";
+import { GetAiRecommendationsBody, GetAiMusicPlaylistBody, GetMustVisitPlacesBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
@@ -67,6 +67,76 @@ Include 5-8 diverse recommendations across categories.`;
   } catch (err) {
     req.log.error({ err }, "AI recommendations failed");
     res.status(500).json({ error: "Failed to get AI recommendations" });
+  }
+});
+
+router.post("/must-visit", async (req, res) => {
+  const parsed = GetMustVisitPlacesBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
+    return;
+  }
+
+  const { startLocation, destination } = parsed.data;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 8192,
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert travel guide with deep knowledge of tourist attractions, landmarks, and hidden gems worldwide. Always recommend real, specific places that actually exist. Respond with valid JSON only.",
+        },
+        {
+          role: "user",
+          content: `Give me the must-visit places for a road trip from ${startLocation} to ${destination}.
+
+Return TWO categories:
+1. "enRoute" - real, notable places and attractions that are on or close to the route between ${startLocation} and ${destination}
+2. "atDestination" - the top must-visit attractions, landmarks, and experiences at ${destination}
+
+Also include a short "destinationOverview" paragraph about ${destination} (2-3 sentences on what makes it worth visiting).
+
+Respond with JSON:
+{
+  "destinationOverview": "What makes ${destination} special and worth visiting",
+  "enRoute": [
+    {
+      "name": "Exact real place name",
+      "category": "landmark|park|museum|viewpoint|historic|beach|temple|fort|market|garden|waterfall|palace|nature|religious",
+      "location": "City or area name",
+      "description": "2-3 sentence description of the place",
+      "why": "Specific reason why this is worth a stop on this route",
+      "estimatedTime": "e.g. 1-2 hours",
+      "approximateDistance": "e.g. 120 miles from ${startLocation}",
+      "tips": "Practical tip for visiting (best time, entry fee, parking, etc.)"
+    }
+  ],
+  "atDestination": [
+    {
+      "name": "Exact real place name",
+      "category": "landmark|park|museum|viewpoint|historic|beach|temple|fort|market|garden|waterfall|palace|nature|religious",
+      "description": "2-3 sentence description",
+      "why": "Why this is a must-see at ${destination}",
+      "estimatedTime": "e.g. 2-3 hours",
+      "tips": "Practical tip for visiting"
+    }
+  ]
+}
+
+Include 4-6 enRoute places and 6-8 atDestination places. Only include REAL places that actually exist. Be specific with names — no generic descriptions.`,
+        },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("No response from AI");
+    res.json(JSON.parse(content));
+  } catch (err) {
+    req.log.error({ err }, "Must-visit places generation failed");
+    res.status(500).json({ error: "Failed to generate must-visit places" });
   }
 });
 

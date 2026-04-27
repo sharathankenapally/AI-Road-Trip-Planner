@@ -1136,9 +1136,42 @@ export const GetAiRecommendationsResponse = zod.object({
 });
 
 /**
+ * @summary Get must-visit places along the route and at destination
+ */
+export const GetMustVisitPlacesBody = zod.object({
+  startLocation: zod.string(),
+  destination: zod.string(),
+});
+
+export const GetMustVisitPlacesResponse = zod.object({
+  enRoute: zod.array(
+    zod.object({
+      name: zod.string(),
+      category: zod.string(),
+      location: zod.string(),
+      description: zod.string(),
+      why: zod.string(),
+      estimatedTime: zod.string(),
+      approximateDistance: zod.string(),
+      tips: zod.string().optional(),
+    })
+  ),
+  atDestination: zod.array(
+    zod.object({
+      name: zod.string(),
+      category: zod.string(),
+      description: zod.string(),
+      why: zod.string(),
+      estimatedTime: zod.string(),
+      tips: zod.string().optional(),
+    })
+  ),
+  destinationOverview: zod.string(),
+});
+
+/**
  * @summary Get AI-curated music playlist for the trip
  */
-
 export const GetAiMusicPlaylistBody = zod.object({
   tripRequest: zod.object({
     travelers: zod.number().min(1),

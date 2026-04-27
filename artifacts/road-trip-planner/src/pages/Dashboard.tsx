@@ -5,7 +5,7 @@ import { StopsTimeline } from '@/components/dashboard/StopsTimeline';
 import { MealsList } from '@/components/dashboard/MealsList';
 import { DelayAdjuster } from '@/components/dashboard/DelayAdjuster';
 import { useTripStore } from '@/store/use-trip-store';
-import { Map, Flag, MapPin, Save, PlayCircle, Navigation, Music as MusicIcon } from 'lucide-react';
+import { Map, Flag, MapPin, Save, PlayCircle, Navigation, Music as MusicIcon, Star } from 'lucide-react';
 import { formatTripTime } from '@/utils/formatTripTime';
 import { useSaveTrip } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,12 @@ import { TrafficPanel } from '@/components/dashboard/TrafficPanel';
 import { NearbyPlaces } from '@/components/dashboard/NearbyPlaces';
 import { MusicPlayer } from '@/components/dashboard/MusicPlayer';
 import { AiAdvisor } from '@/components/dashboard/AiAdvisor';
+import { MustVisitPlaces } from '@/components/dashboard/MustVisitPlaces';
 
 export default function Dashboard() {
   const { plan, request, liveMode, setLiveMode, savedTripId, setSavedTripId } = useTripStore();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<'stops' | 'meals' | 'map' | 'music' | 'nearby'>('map');
+  const [activeTab, setActiveTab] = useState<'stops' | 'meals' | 'map' | 'music' | 'nearby' | 'mustvisit'>('map');
   const saveTripMutation = useSaveTrip();
 
   useEffect(() => {
@@ -129,11 +130,12 @@ export default function Dashboard() {
             <div>
               <div className="flex overflow-x-auto no-scrollbar items-center gap-2 sm:gap-6 mb-8 border-b border-border/60 pb-px">
                 {[
-                  { id: 'map', label: 'Map View', icon: <Map className="w-5 h-5" /> },
-                  { id: 'stops', label: `Stops (${plan.stops.length})`, icon: <Flag className="w-5 h-5" /> },
-                  { id: 'meals', label: `Dining (${plan.mealRecommendations.length})`, icon: <MapPin className="w-5 h-5" /> },
-                  { id: 'nearby', label: 'Nearby Places', icon: <Navigation className="w-5 h-5" /> },
-                  { id: 'music', label: 'Music', icon: <MusicIcon className="w-5 h-5" /> },
+                  { id: 'map',       label: 'Map View',                           icon: <Map className="w-5 h-5" /> },
+                  { id: 'mustvisit', label: 'Must Visit',                          icon: <Star className="w-5 h-5" /> },
+                  { id: 'stops',     label: `Stops (${plan.stops.length})`,        icon: <Flag className="w-5 h-5" /> },
+                  { id: 'meals',     label: `Dining (${plan.mealRecommendations.length})`, icon: <MapPin className="w-5 h-5" /> },
+                  { id: 'nearby',    label: 'Nearby',                              icon: <Navigation className="w-5 h-5" /> },
+                  { id: 'music',     label: 'Music',                               icon: <MusicIcon className="w-5 h-5" /> },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -148,11 +150,12 @@ export default function Dashboard() {
               </div>
 
               <div className="min-h-[50vh]">
-                {activeTab === 'map' && <MapView />}
-                {activeTab === 'stops' && <StopsTimeline />}
-                {activeTab === 'meals' && <MealsList />}
-                {activeTab === 'nearby' && <NearbyPlaces />}
-                {activeTab === 'music' && <MusicPlayer />}
+                {activeTab === 'map'       && <MapView />}
+                {activeTab === 'mustvisit' && <MustVisitPlaces />}
+                {activeTab === 'stops'     && <StopsTimeline />}
+                {activeTab === 'meals'     && <MealsList />}
+                {activeTab === 'nearby'    && <NearbyPlaces />}
+                {activeTab === 'music'     && <MusicPlayer />}
               </div>
             </div>
           </div>

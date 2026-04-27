@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTripStore } from '@/store/use-trip-store';
 import { useGetAiMusicPlaylist, MusicPlaylistRequestMood, MusicPlaylistRequestRouteType } from '@workspace/api-client-react';
-import { Music, Play, Pause, SkipForward, SkipBack, Share2, Youtube, Loader2, Globe } from 'lucide-react';
+import { Music, Play, Pause, SkipForward, SkipBack, Share2, Youtube, Loader2, Globe, ListMusic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 
@@ -67,6 +67,23 @@ export function MusicPlayer() {
       );
       toast({ title: 'Copied to clipboard!' });
     }
+  };
+
+  const buildYouTubeMusicPlaylistUrl = () => {
+    if (!musicPlaylist) return '#';
+    // Build a search query from the top tracks: "Artist1 - Song1, Artist2 - Song2 ..."
+    const trackQuery = musicPlaylist.tracks
+      .slice(0, 5)
+      .map(t => `${t.artist} ${t.title}`)
+      .join(' ');
+    return `https://music.youtube.com/search?q=${encodeURIComponent(trackQuery)}`;
+  };
+
+  const buildYouTubePlaylistSearchUrl = () => {
+    if (!musicPlaylist) return '#';
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(
+      musicPlaylist.playlistName + ' ' + language + ' road trip playlist'
+    )}`;
   };
 
   const currentTrack = musicPlaylist?.tracks[currentTrackIndex];
@@ -171,14 +188,39 @@ export function MusicPlayer() {
 
           {/* Track List */}
           <div className="flex-1 p-6 max-h-[420px] overflow-y-auto">
-            <div className="flex justify-between items-start mb-5">
-              <div>
-                <h4 className="text-xl font-bold font-display">{musicPlaylist.playlistName}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{musicPlaylist.playlistDescription}</p>
+            <div className="mb-5">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h4 className="text-xl font-bold font-display">{musicPlaylist.playlistName}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">{musicPlaylist.playlistDescription}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{musicPlaylist.tracks.length} tracks · {musicPlaylist.totalDuration}</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={handleShare} title="Copy to clipboard">
+                  <Share2 className="w-4 h-4" />
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleShare} title="Share Playlist">
-                <Share2 className="w-4 h-4" />
-              </Button>
+
+              {/* Play full playlist buttons */}
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={buildYouTubeMusicPlaylistUrl()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-semibold transition-colors"
+                >
+                  <Youtube className="w-3.5 h-3.5" />
+                  Play on YouTube Music
+                </a>
+                <a
+                  href={buildYouTubePlaylistSearchUrl()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground border border-border text-xs font-semibold transition-colors"
+                >
+                  <ListMusic className="w-3.5 h-3.5" />
+                  Search Full Playlist
+                </a>
+              </div>
             </div>
 
             <div className="space-y-1.5">

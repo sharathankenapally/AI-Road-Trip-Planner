@@ -93,7 +93,7 @@ router.post("/music", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a music curator specializing in road trip playlists. Create detailed, personalized playlists. Respond with valid JSON only.",
+          content: "You are a music curator specializing in road trip playlists. You strictly follow the language requirement — every single track you recommend must be a song whose lyrics are primarily in the requested language. Respond with valid JSON only.",
         },
         {
           role: "user",
@@ -102,13 +102,18 @@ Mood: ${mood}
 Route type: ${routeType ?? "balanced"}
 Time of day: ${currentTimeOfDay ?? "afternoon"}
 Preferred genres: ${(genres ?? []).join(", ") || "open to suggestions"}
-Song language: ${language ?? "English"}
+REQUIRED SONG LANGUAGE: ${language ?? "English"}
 
-IMPORTANT: All songs must be primarily in ${language ?? "English"}. Include authentic, well-known songs in that language — not just translations of English songs. If the language has a rich music tradition, celebrate it with genre-appropriate hits and hidden gems.
+CRITICAL RULES:
+1. Every single track MUST have lyrics primarily in ${language ?? "English"}.
+2. Do NOT include any songs in other languages.
+3. Use real, well-known artists who sing in ${language ?? "English"}.
+4. Celebrate the ${language ?? "English"} music scene — include a mix of classic hits and modern popular songs.
+5. The playlist name and description should reflect ${language ?? "English"} musical culture.
 
 Respond with JSON:
 {
-  "playlistName": "Creative playlist name in or inspired by ${language ?? "English"}",
+  "playlistName": "Playlist name reflecting ${language ?? "English"} music culture",
   "playlistDescription": "Description of the playlist vibe",
   "mood": "${mood}",
   "genres": ["genre1", "genre2"],

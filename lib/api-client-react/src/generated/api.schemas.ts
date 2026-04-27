@@ -363,6 +363,8 @@ export interface MusicPlaylistRequest {
   routeType?: MusicPlaylistRequestRouteType;
   /** Preferred music genres */
   genres?: string[];
+  /** Preferred language for songs */
+  language?: string;
 }
 
 export type MusicTrackEnergy =

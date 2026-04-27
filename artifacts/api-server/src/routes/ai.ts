@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { GetAiRecommendationsBody, GetAiMusicPlaylistBody, GetMustVisitPlacesBody } from "@workspace/api-zod";
+import { GetAiRecommendationsBody, GetAiMusicPlaylistBody, GetMustVisitPlacesBody, GetRestStopsBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
@@ -67,6 +67,73 @@ Include 5-8 diverse recommendations across categories.`;
   } catch (err) {
     req.log.error({ err }, "AI recommendations failed");
     res.status(500).json({ error: "Failed to get AI recommendations" });
+  }
+});
+
+router.post("/rest-stops", async (req, res) => {
+  const parsed = GetRestStopsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
+    return;
+  }
+
+  const { startLocation, destination, startTime, totalDistance } = parsed.data;
+  const departureHour = new Date(startTime).getUTCHours();
+  const timeLabel = departureHour >= 20
+    ? "evening/night"
+    : departureHour < 6
+    ? "late night/early morning"
+    : "night";
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 4096,
+      messages: [
+        {
+          role: "system",
+          content: "You are a road trip safety advisor with expertise in overnight travel planning. You recommend real, specific rest stops, motels, and safe overnight options along US and international routes. Respond with valid JSON only.",
+        },
+        {
+          role: "user",
+          content: `A traveler is making a road trip from ${startLocation} to ${destination}${totalDistance ? ` (approximately ${totalDistance})` : ""}. They are departing in the ${timeLabel} (local departure time is around ${departureHour}:00).
+
+Suggest 4-6 real, specific places to stop and rest along this route — mix of motels, rest areas, truck stops, and/or campgrounds depending on what's realistic for this route.
+
+Also provide:
+1. A safety tip specific to late-night driving on this type of route
+2. Practical driving advice for overnight travel on this route
+
+Respond with JSON:
+{
+  "restStops": [
+    {
+      "name": "Real specific place name (e.g. Holiday Inn Express, Flying J Travel Center, etc.)",
+      "type": "motel|rest_area|truck_stop|hotel|campground",
+      "location": "City, State",
+      "approximateMileage": "e.g. ~120 miles from ${startLocation}",
+      "amenities": ["WiFi", "Fuel", "Food", "Restrooms", "Showers", "24-hour"],
+      "priceRange": "e.g. $60-90/night (omit for free rest areas)",
+      "notes": "Brief description: why this stop is good, what to expect, any notable features",
+      "recommendedFor": "e.g. Quick 2-hour rest, Overnight sleep, Fuel + coffee break"
+    }
+  ],
+  "safetyTip": "A specific safety warning relevant to this route at night (fatigue, wildlife, weather, etc.)",
+  "drivingAdvice": "Practical advice for driving this route at night (best sections, speed limits, rest interval, etc.)"
+}
+
+Only include REAL places that actually exist on or very near the ${startLocation} to ${destination} route.`,
+        },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("No response from AI");
+    res.json(JSON.parse(content));
+  } catch (err) {
+    req.log.error({ err }, "Rest stops generation failed");
+    res.status(500).json({ error: "Failed to generate rest stop suggestions" });
   }
 });
 

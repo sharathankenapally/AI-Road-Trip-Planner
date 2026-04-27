@@ -1136,6 +1136,33 @@ export const GetAiRecommendationsResponse = zod.object({
 });
 
 /**
+ * @summary Get late-night rest stop suggestions (motels, rest areas) for the route
+ */
+export const GetRestStopsBody = zod.object({
+  startLocation: zod.string(),
+  destination: zod.string(),
+  startTime: zod.string(),
+  totalDistance: zod.string().optional(),
+});
+
+export const GetRestStopsResponse = zod.object({
+  restStops: zod.array(
+    zod.object({
+      name: zod.string(),
+      type: zod.enum(["motel", "rest_area", "truck_stop", "hotel", "campground"]),
+      location: zod.string(),
+      approximateMileage: zod.string(),
+      amenities: zod.array(zod.string()),
+      priceRange: zod.string().optional(),
+      notes: zod.string(),
+      recommendedFor: zod.string(),
+    })
+  ),
+  safetyTip: zod.string(),
+  drivingAdvice: zod.string(),
+});
+
+/**
  * @summary Get must-visit places along the route and at destination
  */
 export const GetMustVisitPlacesBody = zod.object({

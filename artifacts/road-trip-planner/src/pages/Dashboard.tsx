@@ -18,6 +18,7 @@ import { NearbyPlaces } from '@/components/dashboard/NearbyPlaces';
 import { MusicPlayer } from '@/components/dashboard/MusicPlayer';
 import { AiAdvisor } from '@/components/dashboard/AiAdvisor';
 import { MustVisitPlaces } from '@/components/dashboard/MustVisitPlaces';
+import { LateNightRestStops } from '@/components/dashboard/LateNightRestStops';
 
 export default function Dashboard() {
   const { plan, request, liveMode, setLiveMode, savedTripId, setSavedTripId } = useTripStore();
@@ -125,6 +126,7 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <DelayAdjuster />
+            <LateNightRestStops />
             
             {/* Main Tabs */}
             <div>

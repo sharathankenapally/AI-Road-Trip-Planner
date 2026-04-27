@@ -77,12 +77,13 @@ router.post("/music", async (req, res) => {
     return;
   }
 
-  const { tripRequest, mood, routeType, currentTimeOfDay, genres } = parsed.data as {
+  const { tripRequest, mood, routeType, currentTimeOfDay, genres, language } = parsed.data as {
     tripRequest: { startLocation: string; destination: string };
     mood: string;
     routeType?: string;
     currentTimeOfDay?: string;
     genres?: string[];
+    language?: string;
   };
 
   try {
@@ -101,10 +102,13 @@ Mood: ${mood}
 Route type: ${routeType ?? "balanced"}
 Time of day: ${currentTimeOfDay ?? "afternoon"}
 Preferred genres: ${(genres ?? []).join(", ") || "open to suggestions"}
+Song language: ${language ?? "English"}
+
+IMPORTANT: All songs must be primarily in ${language ?? "English"}. Include authentic, well-known songs in that language — not just translations of English songs. If the language has a rich music tradition, celebrate it with genre-appropriate hits and hidden gems.
 
 Respond with JSON:
 {
-  "playlistName": "Creative playlist name",
+  "playlistName": "Creative playlist name in or inspired by ${language ?? "English"}",
   "playlistDescription": "Description of the playlist vibe",
   "mood": "${mood}",
   "genres": ["genre1", "genre2"],

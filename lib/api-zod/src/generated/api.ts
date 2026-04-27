@@ -1161,6 +1161,7 @@ export const GetAiMusicPlaylistBody = zod.object({
   ]),
   routeType: zod.enum(["fastest", "scenic", "balanced"]).optional(),
   genres: zod.array(zod.string()).optional().describe("Preferred music genres"),
+  language: zod.string().optional().describe("Preferred language for songs"),
 });
 
 export const GetAiMusicPlaylistResponse = zod.object({
